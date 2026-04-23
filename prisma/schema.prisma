@@ -21,16 +21,21 @@ model User {
 }
 
 model Item {
-  id          Int    @id @default(autoincrement())
-  name        String
-  category    String
-  subcategory String
-  price       Float
-  stock       Int
-  createdBy   Int
+  id            Int          @id @default(autoincrement())
+  name          String
+  price         Float
+  stock         Int
+  createdBy     Int
 
-  orderItems  OrderItem[]   // 🔥 ADD THIS LINE
+  categoryId    Int
+  subcategoryId Int
+
+  category      Category     @relation(fields: [categoryId], references: [id])
+  subcategory   Subcategory  @relation(fields: [subcategoryId], references: [id])
+
+  orderItems    OrderItem[]
 }
+
 
 model Order {
   id           Int      @id @default(autoincrement())
@@ -51,3 +56,33 @@ model OrderItem {
   item  Item  @relation(fields: [itemId], references: [id]) // 🔥 ADD THIS
 }
 
+model Category {
+  id            Int           @id @default(autoincrement())
+  name          String        @unique
+  description   String?
+
+  subcategories Subcategory[]
+  items         Item[]
+}
+
+
+model Subcategory {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  items       Item[]
+
+  @@unique([name, categoryId])
+}
+
+model Customer {
+  id        Int    @id @default(autoincrement())
+  name      String
+  phone     String
+  aadharNo  String @unique
+  email     String @unique
+}

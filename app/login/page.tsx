@@ -47,35 +47,41 @@ export default function Login() {
   });
 
   const onSubmit = async (data: any) => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = await axios.post("/api/auth/login", data);
+    const res = await axios.post("/api/auth/login", data);
 
-      localStorage.setItem("token", res.data.token);
+    const token = res.data.token;
 
-      setType("success");
-      setMessage("Login successful 🎉");
-      setOpen(true);
+    // ✅ OPTIONAL
+    localStorage.setItem("token", token);
 
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 1200);
-    } catch (err: any) {
-      setType("error");
-      setMessage(err.response?.data?.error || "Login failed");
-      setOpen(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+    // 🔥 IMPORTANT (REQUIRED FOR MIDDLEWARE)
+    document.cookie = `token=${token}; path=/`;
+
+    setType("success");
+    setMessage("Login successful ");
+    setOpen(true);
+
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 1200);
+  } catch (err: any) {
+    setType("error");
+    setMessage(err.response?.data?.error || "Login failed");
+    setOpen(true);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Container maxWidth="sm">
       <Box sx={{ mt: 8, display: "flex", justifyContent: "center" }}>
         <Paper elevation={4} sx={{ p: 4, width: "100%", borderRadius: 3 }}>
           <Typography variant="h4" align="center" sx={{ mb: 3 }}>
-            Welcome Back 👋
+            Welcome Back 
           </Typography>
 
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -121,7 +127,7 @@ export default function Login() {
               {loading ? "Logging in..." : "Login"}
             </Button>
 
-            {/* 🔗 Register Link */}
+            {/* Register Link */}
             <Typography align="center" sx={{ mt: 2 }}>
               Don’t have an account?{" "}
               <Link
@@ -136,7 +142,6 @@ export default function Login() {
         </Paper>
       </Box>
 
-      {/* 🔔 Snackbar */}
       <Snackbar
         open={open}
         autoHideDuration={3000}

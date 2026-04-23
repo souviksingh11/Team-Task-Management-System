@@ -1,67 +1,45 @@
 "use client";
 
-import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button } from "@mui/material";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 export default function Navbar() {
   const router = useRouter();
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    router.push("/login");
+  const logout = async () => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Logout",
+    });
+
+    if (result.isConfirmed) {
+      localStorage.removeItem("token");
+      document.cookie = "token=; Max-Age=0; path=/";
+
+      await Swal.fire({
+        icon: "success",
+        title: "Logged out!",
+        timer: 1000,
+        showConfirmButton: false,
+      });
+
+      router.replace("/login");
+    }
   };
 
   return (
-    <AppBar position="static" sx={{ background: "#1976d2" }}>
-      <Toolbar sx={{ display: "flex", alignItems: "center" }}>
-        
-        {/* LEFT LOGO */}
-        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+    <AppBar position="fixed" sx={{ background: "#1976d2" }}>
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }}>
           Inventory POS
         </Typography>
 
-        {/* CENTER MENU */}
-        <Box
-          sx={{
-            display: "flex",
-            gap: 2,
-            mx: "auto", // 👉 pushes this to center
-          }}
-        >
-          <Button
-            color="inherit"
-            onClick={() => router.push("/dashboard")}
-            sx={hoverStyle}
-          >
-            Dashboard
-          </Button>
-
-          <Button
-            color="inherit"
-            onClick={() => router.push("/items")}
-            sx={hoverStyle}
-          >
-            📦 Items
-          </Button>
-
-          <Button
-            color="inherit"
-            onClick={() => router.push("/items/create")}
-            sx={hoverStyle}
-          >
-            ➕ Add
-          </Button>
-
-          <Button
-            color="inherit"
-            onClick={() => router.push("/pos")}
-            sx={hoverStyle}
-          >
-            🧾 POS
-          </Button>
-        </Box>
-
-        {/* RIGHT LOGOUT */}
         <Button
           color="error"
           variant="outlined"
@@ -72,7 +50,6 @@ export default function Navbar() {
             "&:hover": {
               backgroundColor: "white",
               color: "#1976d2",
-              borderColor: "white",
             },
           }}
         >
@@ -82,12 +59,3 @@ export default function Navbar() {
     </AppBar>
   );
 }
-
-/* 🔥 Hover Style for buttons */
-const hoverStyle = {
-  transition: "0.3s",
-  "&:hover": {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    transform: "scale(1.05)",
-  },
-};

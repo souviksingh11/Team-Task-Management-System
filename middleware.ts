@@ -2,18 +2,28 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
+  const { pathname } = req.nextUrl;
 
-  console.log("AUTH HEADER 👉", authHeader);
+  const token = req.cookies.get("token")?.value;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  /* ✅ PUBLIC ROUTES (allowed without login) */
+  if (pathname === "/login" || pathname === "/register") {
+    // If already logged in → redirect to dashboard
+    if (token) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+    return NextResponse.next();
   }
 
+  /* ❌ PROTECTED ROUTES */
+  if (!token) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
 
   return NextResponse.next();
 }
 
+/* ✅ Apply to all pages */
 export const config = {
-  matcher: ["/api/items/:path*", "/api/orders/:path*"],
+  matcher: ["/((?!_next|favicon.ico|api).*)"],
 };
